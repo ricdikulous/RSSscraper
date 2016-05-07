@@ -1,5 +1,6 @@
 package com.dikulous.ric.myapplication.backend.datastore;
 
+import com.dikulous.ric.myapplication.backend.model.KeyWordEntity;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
@@ -49,6 +50,17 @@ public class KeyWordDatastore {
         return keyWords;
     }
 
+    public static List<KeyWordEntity> readAllKeyWordEntities(){
+        List<KeyWordEntity> keyWordEntities = new ArrayList<>();
+        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+        Query q = new Query(KIND);
+        PreparedQuery pq = datastore.prepare(q);
+        for(Entity result:pq.asIterable()){
+            keyWordEntities.add(entityToKeyWordEntity(result));
+        }
+        return keyWordEntities;
+    }
+
     public static boolean doesKeyWordExist(String keyWord){
         DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
         Query q = new Query(KIND);
@@ -59,5 +71,14 @@ public class KeyWordDatastore {
             return true;
         }
         return false;
+    }
+
+    private static KeyWordEntity entityToKeyWordEntity(Entity entity){
+        KeyWordEntity keyWordEntity = new KeyWordEntity();
+        keyWordEntity.setKeyWord((String)entity.getProperty(PROPERTY_KEY_WORD));
+        keyWordEntity.setCategory((String) entity.getProperty(PROPERTY_CATEGORY));
+        keyWordEntity.setTone((String) entity.getProperty(PROPERTY_TONE));
+        keyWordEntity.setCreatedAt((Long) entity.getProperty(PROPERTY_CREATED_AT));
+        return keyWordEntity;
     }
 }

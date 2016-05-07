@@ -1,5 +1,6 @@
 package com.dikulous.ric.myapplication.backend.datastore;
 
+import com.dikulous.ric.myapplication.backend.model.RssEntity;
 import com.dikulous.ric.myapplication.backend.util.RssHelper;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -55,6 +56,17 @@ public class RssDatastore {
         return urls;
     }
 
+    public static List<RssEntity> readRssEntities(){
+        List<RssEntity> rssEntities = new ArrayList<>();
+        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+        Query q = new Query(KIND);
+        PreparedQuery pq = datastore.prepare(q);
+        for(Entity result:pq.asIterable()){
+            rssEntities.add(entityToRssEntity(result));
+        }
+        return rssEntities;
+    }
+
     public static boolean doesUrlExist(String url){
         DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
         Query q = new Query(KIND);
@@ -65,5 +77,15 @@ public class RssDatastore {
             return true;
         }
         return false;
+    }
+
+    private static RssEntity entityToRssEntity(Entity entity) {
+        RssEntity rssEntity = new RssEntity();
+        rssEntity.setUrl((String)entity.getProperty(PROPERTY_URL));
+        rssEntity.setCountryCode((String)entity.getProperty(PROPERTY_COUNTRY));
+        rssEntity.setCategory((String)entity.getProperty(PROPERTY_CATEGORY));
+        rssEntity.setScheduledRead((Long)entity.getProperty(PROPERTY_SCHEDULED_READ));
+        rssEntity.setReadFrequency((Long)entity.getProperty(PROPERTY_READ_FREQUENCY));
+        return rssEntity;
     }
 }
