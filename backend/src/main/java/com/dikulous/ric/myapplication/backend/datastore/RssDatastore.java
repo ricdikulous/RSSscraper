@@ -8,10 +8,13 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.repackaged.com.google.common.base.Pair;
+import com.googlecode.objectify.ObjectifyService;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import static com.googlecode.objectify.ObjectifyService.ofy;
 
 /**
  * Created by ric on 7/05/16.
@@ -19,24 +22,19 @@ import java.util.List;
 public class RssDatastore {
     private static final Long HOUR_IN_MILLI_SECONDS = 3600000L;
 
-    private static final String KIND = "Rss";
-    private static final String PROPERTY_URL = "url";
-    private static final String PROPERTY_COUNTRY = "country";
-    private static final String PROPERTY_CATEGORY = "category";
-    private static final String PROPERTY_SCHEDULED_READ = "scheduledRead";
-    private static final String PROPERTY_READ_FREQUENCY = "readFrequency";
-
+    static {
+        ObjectifyService.register(RssEntity.class);
+    }
     public static Boolean insertRss(String url, String country, String category){
-        DatastoreService datastoreService = DatastoreServiceFactory.getDatastoreService();
         Boolean success = false;
         if(!doesUrlExist(url) && RssHelper.isUrlValid(url)) {
-            Entity entity = new Entity(KIND);
-            entity.setProperty(PROPERTY_URL, url);
-            entity.setProperty(PROPERTY_COUNTRY, country);
-            entity.setProperty(PROPERTY_CATEGORY, category);
-            entity.setProperty(PROPERTY_SCHEDULED_READ, new Date().getTime());
-            entity.setProperty(PROPERTY_READ_FREQUENCY, HOUR_IN_MILLI_SECONDS);
-            datastoreService.put(entity);
+            RssEntity rssEntity = new RssEntity();
+            rssEntity.setUrl(url);
+            rssEntity.setCountryCode(country);
+            rssEntity.setCategory(category);
+            rssEntity.setScheduledRead(new Date().getTime());
+            rssEntity.setReadFrequency(HOUR_IN_MILLI_SECONDS);
+            ofy().save().entity(rssEntity);
             success = true;
             System.out.println("put in new");
         } else {
@@ -47,45 +45,21 @@ public class RssDatastore {
 
     public static List<String> readAllUrls(){
         List<String> urls = new ArrayList<>();
-        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-        Query q = new Query(KIND);
-        PreparedQuery pq = datastore.prepare(q);
-        for(Entity result:pq.asIterable()){
-            urls.add((String)result.getProperty(PROPERTY_URL));
+        for(RssEntity rssEntity:ofy().load().type(RssEntity.class).list()){
+            urls.add(rssEntity.getUrl());
         }
         return urls;
     }
 
     public static List<RssEntity> readRssEntities(){
-        List<RssEntity> rssEntities = new ArrayList<>();
-        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-        Query q = new Query(KIND);
-        PreparedQuery pq = datastore.prepare(q);
-        for(Entity result:pq.asIterable()){
-            rssEntities.add(entityToRssEntity(result));
-        }
-        return rssEntities;
+        return ofy().load().type(RssEntity.class).list();
     }
 
     public static boolean doesUrlExist(String url){
-        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-        Query q = new Query(KIND);
-        Query.Filter urlFilter = new Query.FilterPredicate(PROPERTY_URL, Query.FilterOperator.EQUAL, url);
-        q.setFilter(urlFilter);
-        PreparedQuery pq = datastore.prepare(q);
-        for(Entity result:pq.asIterable()){
+        if(ofy().load().type(RssEntity.class).filter("url", url).first().now() != null){
             return true;
         }
         return false;
     }
 
-    private static RssEntity entityToRssEntity(Entity entity) {
-        RssEntity rssEntity = new RssEntity();
-        rssEntity.setUrl((String)entity.getProperty(PROPERTY_URL));
-        rssEntity.setCountryCode((String)entity.getProperty(PROPERTY_COUNTRY));
-        rssEntity.setCategory((String)entity.getProperty(PROPERTY_CATEGORY));
-        rssEntity.setScheduledRead((Long)entity.getProperty(PROPERTY_SCHEDULED_READ));
-        rssEntity.setReadFrequency((Long)entity.getProperty(PROPERTY_READ_FREQUENCY));
-        return rssEntity;
-    }
 }

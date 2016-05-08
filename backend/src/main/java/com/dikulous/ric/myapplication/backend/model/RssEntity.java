@@ -1,14 +1,20 @@
 package com.dikulous.ric.myapplication.backend.model;
 
+import com.googlecode.objectify.annotation.Entity;
+import com.googlecode.objectify.annotation.Id;
+import com.googlecode.objectify.annotation.Index;
+
 /**
  * Created by ric on 7/05/16.
  */
+@Entity
 public class RssEntity {
-    String url;
-    String countryCode;
-    String category;
-    Long scheduledRead;
-    Long readFrequency;
+    @Id Long id;
+    @Index String url;
+    @Index String countryCode;
+    @Index String category;
+    @Index Long scheduledRead;
+    @Index Long readFrequency;
 
     public String getUrl() {
         return url;

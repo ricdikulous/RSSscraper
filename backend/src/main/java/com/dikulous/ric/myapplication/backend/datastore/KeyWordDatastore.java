@@ -6,33 +6,33 @@ import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
+import com.googlecode.objectify.ObjectifyService;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static com.googlecode.objectify.ObjectifyService.ofy;
+
 /**
  * Created by ric on 7/05/16.
  */
 public class KeyWordDatastore {
-    public final static String KIND = "KeyWords";
-    public final static String PROPERTY_KEY_WORD = "keyWord";
-    public final static String PROPERTY_CATEGORY = "category";
-    public final static String PROPERTY_TONE = "tone";
-    public final static String PROPERTY_CREATED_AT = "createdAt";
+
+    static {
+        ObjectifyService.register(KeyWordEntity.class);
+    }
 
     public static Boolean insertKeyWord(String keyWord, String category, String tone){
-        DatastoreService datastoreService = DatastoreServiceFactory.getDatastoreService();
         Boolean success = false;
         if(!doesKeyWordExist(keyWord)) {
-            Entity entity = new Entity(KIND);
-            entity.setProperty(PROPERTY_KEY_WORD, keyWord);
-            entity.setProperty(PROPERTY_CATEGORY, category);
-            entity.setProperty(PROPERTY_TONE, tone);
-            entity.setProperty(PROPERTY_CREATED_AT, new Date().getTime());
-            datastoreService.put(entity);
+            KeyWordEntity keyWordEntity = new KeyWordEntity();
+            keyWordEntity.setKeyWord(keyWord);
+            keyWordEntity.setCategory(category);
+            keyWordEntity.setTone(tone);
+            keyWordEntity.setCreatedAt(new Date().getTime());
+            ofy().save().entity(keyWordEntity).now();
             success = true;
-            System.out.println("put in new");
         } else {
             System.out.println("Already exists or is not valid");
         }
@@ -41,44 +41,22 @@ public class KeyWordDatastore {
 
     public static List<String> readAllKeyWords(){
         List<String> keyWords = new ArrayList<>();
-        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-        Query q = new Query(KIND);
-        PreparedQuery pq = datastore.prepare(q);
-        for(Entity result:pq.asIterable()){
-            keyWords.add((String)result.getProperty(PROPERTY_KEY_WORD));
+        for(KeyWordEntity entity:ofy().load().type(KeyWordEntity.class).project("keyWord").list()){
+            keyWords.add(entity.getKeyWord());
         }
         return keyWords;
     }
 
     public static List<KeyWordEntity> readAllKeyWordEntities(){
-        List<KeyWordEntity> keyWordEntities = new ArrayList<>();
-        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-        Query q = new Query(KIND);
-        PreparedQuery pq = datastore.prepare(q);
-        for(Entity result:pq.asIterable()){
-            keyWordEntities.add(entityToKeyWordEntity(result));
-        }
-        return keyWordEntities;
+        return ofy().load().type(KeyWordEntity.class).list();
     }
 
     public static boolean doesKeyWordExist(String keyWord){
-        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-        Query q = new Query(KIND);
-        Query.Filter keyWordFilter = new Query.FilterPredicate(PROPERTY_KEY_WORD, Query.FilterOperator.EQUAL, keyWord);
-        q.setFilter(keyWordFilter);
-        PreparedQuery pq = datastore.prepare(q);
-        for(Entity result:pq.asIterable()){
+        if(ofy().load().type(KeyWordEntity.class).filter("keyWord", keyWord).first().now() != null){
             return true;
+        } else {
+            return false;
         }
-        return false;
-    }
 
-    private static KeyWordEntity entityToKeyWordEntity(Entity entity){
-        KeyWordEntity keyWordEntity = new KeyWordEntity();
-        keyWordEntity.setKeyWord((String)entity.getProperty(PROPERTY_KEY_WORD));
-        keyWordEntity.setCategory((String) entity.getProperty(PROPERTY_CATEGORY));
-        keyWordEntity.setTone((String) entity.getProperty(PROPERTY_TONE));
-        keyWordEntity.setCreatedAt((Long) entity.getProperty(PROPERTY_CREATED_AT));
-        return keyWordEntity;
     }
 }

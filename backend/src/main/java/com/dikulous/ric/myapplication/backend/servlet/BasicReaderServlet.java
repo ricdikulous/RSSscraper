@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.dikulous.ric.myapplication.backend.datastore.RssDatastore;
 import com.google.appengine.repackaged.com.google.api.client.util.DateTime;
 import com.rometools.rome.feed.synd.SyndEntry;
 import com.rometools.rome.feed.synd.SyndEntryImpl;
@@ -29,9 +30,10 @@ public class BasicReaderServlet extends HttpServlet {
             throws IOException {
         resp.setContentType("text/plain");
         resp.getWriter().println("Same as before but the key words are broken up into dates that they are mentioned on");
-        String[] urls = {"http://www.smh.com.au/rssheadlines/business/article/rss.xml","http://www.economist.com/sections/economics/rss.xml","http://www.economist.com/sections/business-finance/rss.xml", "http://www.ft.com/rss/companies/mining", "http://www.itnews.com.au/RSS/rss.ashx?type=Category&ID=37",
-        "http://www.abc.net.au/news/feed/51892/rss.xml", "http://www.abc.net.au/news/feed/51120/rss.xml", "http://rfs.oxfordjournals.org/rss/current.xml", "http://rss.nytimes.com/services/xml/rss/nyt/InternationalHome.xml", "http://feeds.feedburner.com/AICPA_FinancialReportingCenter", "http://feeds.feedburner.com/AICPA_BusinessIndustryGovt", "http://feeds.feedburner.com/AICPA_Tax", "http://feeds.feedburner.com/AICPA_Newsroom", "http://www.journalofaccountancy.com/news.xml"};
+        //String[] urls = {"http://www.smh.com.au/rssheadlines/business/article/rss.xml","http://www.economist.com/sections/economics/rss.xml","http://www.economist.com/sections/business-finance/rss.xml", "http://www.ft.com/rss/companies/mining", "http://www.itnews.com.au/RSS/rss.ashx?type=Category&ID=37",
+        //"http://www.abc.net.au/news/feed/51892/rss.xml", "http://www.abc.net.au/news/feed/51120/rss.xml", "http://rfs.oxfordjournals.org/rss/current.xml", "http://rss.nytimes.com/services/xml/rss/nyt/InternationalHome.xml", "http://feeds.feedburner.com/AICPA_FinancialReportingCenter", "http://feeds.feedburner.com/AICPA_BusinessIndustryGovt", "http://feeds.feedburner.com/AICPA_Tax", "http://feeds.feedburner.com/AICPA_Newsroom", "http://www.journalofaccountancy.com/news.xml"};
 
+        List<String> urls = RssDatastore.readAllUrls();
         Map<String, HashMap<String, Integer>> totals = new HashMap<>();
         totals.put("profit", new HashMap<String, Integer>());
         totals.put("gold", new HashMap<String, Integer>());
@@ -58,7 +60,7 @@ public class BasicReaderServlet extends HttpServlet {
                 //resp.getWriter().println(feed.getTitleEx().toString());
                 for (SyndEntry syndEntry : feed.getEntries()) {
                     DateTime date = new DateTime(syndEntry.getPublishedDate());
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy.MM.dd");
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
                     /*resp.getWriter().println(syndEntry.getPublishedDate());
                     resp.getWriter().println(date.toString());
                     resp.getWriter().println(simpleDateFormat.format(date.getValue()));
@@ -79,7 +81,7 @@ public class BasicReaderServlet extends HttpServlet {
                     //resp.getWriter().println(syndEntry.getPublishedDate());
                 }
             }
-            resp.getWriter().println("From "+urls.length+" rss feeds the following key words were mentioned this many times");
+            resp.getWriter().println("From "+urls.size()+" rss feeds the following key words were mentioned this many times");
             resp.getWriter().println("");
             for(String keyWord:totals.keySet()){
                 resp.getWriter().print(keyWord+": ");
