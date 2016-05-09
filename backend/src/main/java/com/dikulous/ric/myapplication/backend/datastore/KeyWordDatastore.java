@@ -10,6 +10,7 @@ import com.googlecode.objectify.ObjectifyService;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import static com.googlecode.objectify.ObjectifyService.ofy;
@@ -31,6 +32,7 @@ public class KeyWordDatastore {
             keyWordEntity.setCategory(category);
             keyWordEntity.setTone(tone);
             keyWordEntity.setCreatedAt(new Date().getTime());
+            keyWordEntity.setDateCount(new HashMap<String, Long>());
             ofy().save().entity(keyWordEntity).now();
             success = true;
         } else {
@@ -58,5 +60,9 @@ public class KeyWordDatastore {
             return false;
         }
 
+    }
+
+    public static void updateKeyWordEntity(KeyWordEntity keyWordEntity) {
+        ofy().save().entity(keyWordEntity).now();
     }
 }

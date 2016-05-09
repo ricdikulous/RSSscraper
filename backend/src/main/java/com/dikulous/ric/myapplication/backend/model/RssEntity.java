@@ -15,6 +15,16 @@ public class RssEntity {
     @Index String category;
     @Index Long scheduledRead;
     @Index Long readFrequency;
+    Long lastRead;
+
+
+    public Long getLastRead() {
+        return lastRead;
+    }
+
+    public void setLastRead(Long lastRead) {
+        this.lastRead = lastRead;
+    }
 
     public String getUrl() {
         return url;

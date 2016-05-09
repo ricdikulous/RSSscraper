@@ -29,6 +29,7 @@ dependencies {
     compile 'com.rometools:rome:1.5.0'
     compile 'com.google.guava:guava:19.0'
     compile 'com.googlecode.objectify:objectify:5.1.12'
+    compile 'com.ibm.watson.developer_cloud:java-wrapper:1.0.3'
 }
 
 appengine {

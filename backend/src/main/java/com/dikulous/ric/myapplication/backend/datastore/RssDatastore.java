@@ -1,6 +1,7 @@
 package com.dikulous.ric.myapplication.backend.datastore;
 
 import com.dikulous.ric.myapplication.backend.model.RssEntity;
+import com.dikulous.ric.myapplication.backend.util.Globals;
 import com.dikulous.ric.myapplication.backend.util.RssHelper;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -20,7 +21,6 @@ import static com.googlecode.objectify.ObjectifyService.ofy;
  * Created by ric on 7/05/16.
  */
 public class RssDatastore {
-    private static final Long HOUR_IN_MILLI_SECONDS = 3600000L;
 
     static {
         ObjectifyService.register(RssEntity.class);
@@ -33,7 +33,8 @@ public class RssDatastore {
             rssEntity.setCountryCode(country);
             rssEntity.setCategory(category);
             rssEntity.setScheduledRead(new Date().getTime());
-            rssEntity.setReadFrequency(HOUR_IN_MILLI_SECONDS);
+            rssEntity.setReadFrequency(Globals.DEFAULT_RSS_BACKOFF);
+            rssEntity.setLastRead(0L);
             ofy().save().entity(rssEntity);
             success = true;
             System.out.println("put in new");
@@ -55,6 +56,10 @@ public class RssDatastore {
         return ofy().load().type(RssEntity.class).list();
     }
 
+    public static List<RssEntity> readScheduledRssEntities(){
+        return ofy().load().type(RssEntity.class).filter("scheduledRead <=", new Date().getTime()).list();
+    }
+
     public static boolean doesUrlExist(String url){
         if(ofy().load().type(RssEntity.class).filter("url", url).first().now() != null){
             return true;
@@ -62,4 +67,7 @@ public class RssDatastore {
         return false;
     }
 
+    public static void updateRssEntity(RssEntity rssEntity) {
+        ofy().save().entity(rssEntity).now();
+    }
 }
