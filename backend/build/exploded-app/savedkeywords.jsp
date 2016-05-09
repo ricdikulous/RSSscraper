@@ -30,6 +30,7 @@
                                 <th>Key Word</th>
                                 <th>Category</th>
                                 <th>Tone</th>
+                                <th>Chart</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -38,6 +39,7 @@
                                 <td><%=keyWord.getKeyWord()%></td>
                                 <td><%=keyWord.getCategory()%></td>
                                 <td><%=keyWord.getTone()%></td>
+                                <td><a href="/chart.jsp?id=<%=keyWord.getId()%>">Chart</a></td>
                             </tr>
                         <% } %>
                         </tbody>

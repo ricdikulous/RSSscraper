@@ -18,6 +18,14 @@ public class KeyWordEntity {
     @Index Long createdAt;
     Map<String, Long> dateCount;
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public Map<String, Long> getDateCount() {
         return dateCount;
     }

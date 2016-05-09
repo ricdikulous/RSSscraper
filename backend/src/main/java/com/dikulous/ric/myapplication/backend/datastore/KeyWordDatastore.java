@@ -53,6 +53,14 @@ public class KeyWordDatastore {
         return ofy().load().type(KeyWordEntity.class).list();
     }
 
+    public static KeyWordEntity readById(String id){
+        return readById(Long.valueOf(id));
+    }
+
+    public static KeyWordEntity readById(Long id){
+        return ofy().load().type(KeyWordEntity.class).id(id).now();
+    }
+
     public static boolean doesKeyWordExist(String keyWord){
         if(ofy().load().type(KeyWordEntity.class).filter("keyWord", keyWord).first().now() != null){
             return true;

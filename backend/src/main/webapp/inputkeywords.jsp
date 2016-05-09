@@ -48,6 +48,7 @@
                           <label for="categoryInput">Category</label>
                           <select id="categoryInput" name="category" class="form-control">
                               <option value="commodity">Commodity</option>
+                              <option value="modifier">Modifier</option>
                               <option value="business">Business</option>
                               <option value="economic">Economic</option>
                               <option value="finance">Finance</option>

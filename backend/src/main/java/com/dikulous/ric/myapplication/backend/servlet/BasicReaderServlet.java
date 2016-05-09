@@ -12,6 +12,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.dikulous.ric.myapplication.backend.datastore.KeyWordDatastore;
 import com.dikulous.ric.myapplication.backend.datastore.RssDatastore;
@@ -35,6 +37,8 @@ public class BasicReaderServlet extends HttpServlet {
             throws IOException {
         resp.setContentType("text/plain");
         resp.getWriter().println("Same as before but the key words are broken up into dates that they are mentioned on");
+        Logger log = Logger.getLogger("Basic reader");
+        log.setLevel(Level.INFO);
         //ToneAnalyzer service = new ToneAnalyzer(ToneAnalyzer.VERSION_DATE_2016_02_11);
         //service.setUsernameAndPassword("", "");
         //String[] urls = {"http://www.smh.com.au/rssheadlines/business/article/rss.xml","http://www.economist.com/sections/economics/rss.xml","http://www.economist.com/sections/business-finance/rss.xml", "http://www.ft.com/rss/companies/mining", "http://www.itnews.com.au/RSS/rss.ashx?type=Category&ID=37",
@@ -86,18 +90,23 @@ public class BasicReaderServlet extends HttpServlet {
                 }
                 if(allNewHeadlines && atLeastOneNewHeadline){
                     //inverse backoff
+                    log.info("ALL headlines were NEW: "+feed.getTitle());
                     rssEntity.setReadFrequency(Math.max(rssEntity.getReadFrequency() / 2, Globals.MINIMUN_RSS_BACKOFF));
                 } else if(!atLeastOneNewHeadline){
+                    log.info("All headlines were OLD: "+feed.getTitle());
                     //backoff
                     rssEntity.setReadFrequency(Math.min(rssEntity.getReadFrequency()*2, Globals.MAXIMUM_RSS_BACKOFF));
+                } else {
+                    log.info("Some headlinge were NEW: "+feed.getTitle());
                 }
                 Long now = new Date().getTime();
                 rssEntity.setScheduledRead(now+rssEntity.getReadFrequency());
                 rssEntity.setLastRead(now);
                 RssDatastore.updateRssEntity(rssEntity);
             }
-            resp.getWriter().println("From "+rssEntities.size()+" rss feeds and "+headlines+" headlines the following key words were mentioned this many times");
+            resp.getWriter().println("From " + rssEntities.size() + " rss feeds and " + headlines+" headlines the following key words were mentioned this many times");
             resp.getWriter().println("");
+            log.info("Read "+headlines+" headlines from: "+rssEntities.size()+" different feeds");
             for(KeyWordEntity keyWordEntity:keyWordEntities){
                 //save updated values
                 KeyWordDatastore.updateKeyWordEntity(keyWordEntity);
