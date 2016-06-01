@@ -29,7 +29,10 @@ dependencies {
     compile 'com.rometools:rome:1.5.0'
     compile 'com.google.guava:guava:19.0'
     compile 'com.googlecode.objectify:objectify:5.1.12'
+    compile 'com.ibm.watson.developer_cloud:java-sdk:3.0.0-RC1'
     compile 'com.ibm.watson.developer_cloud:java-wrapper:1.0.3'
+    compile 'com.twitter:hbc-core:2.2.0'
+    compile 'com.twitter:hbc-twitter4j:2.2.0'
 }
 
 appengine {

@@ -1,0 +1,120 @@
+package com.dikulous.ric.myapplication.backend.servlet;
+
+import com.dikulous.ric.myapplication.backend.datastore.KeyWordDatastore;
+import com.dikulous.ric.myapplication.backend.datastore.RssDatastore;
+import com.dikulous.ric.myapplication.backend.model.KeyWordEntity;
+import com.dikulous.ric.myapplication.backend.model.RssEntity;
+import com.google.appengine.repackaged.com.google.api.client.util.DateTime;
+import com.rometools.rome.feed.synd.SyndEntry;
+import com.rometools.rome.feed.synd.SyndFeed;
+import com.rometools.rome.io.SyndFeedInput;
+import com.rometools.rome.io.XmlReader;
+
+import java.io.IOException;
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+/**
+ * Created by ric on 15/05/16.
+ */
+public class RssSentimentServlet extends HttpServlet {
+    @Override
+    public void doGet(HttpServletRequest req, HttpServletResponse resp)
+            throws IOException {
+        resp.setContentType("text/plain");
+        resp.getWriter().println("Same as before but the key words are broken up into dates that they are mentioned on");
+        Logger log = Logger.getLogger("Basic reader");
+        log.setLevel(Level.INFO);
+        //ToneAnalyzer service = new ToneAnalyzer(ToneAnalyzer.VERSION_DATE_2016_02_11);
+        //service.setUsernameAndPassword("", "");
+        //String[] urls = {"http://www.smh.com.au/rssheadlines/business/article/rss.xml","http://www.economist.com/sections/economics/rss.xml","http://www.economist.com/sections/business-finance/rss.xml", "http://www.ft.com/rss/companies/mining", "http://www.itnews.com.au/RSS/rss.ashx?type=Category&ID=37",
+        //"http://www.abc.net.au/news/feed/51892/rss.xml", "http://www.abc.net.au/news/feed/51120/rss.xml", "http://rfs.oxfordjournals.org/rss/current.xml", "http://rss.nytimes.com/services/xml/rss/nyt/InternationalHome.xml", "http://feeds.feedburner.com/AICPA_FinancialReportingCenter", "http://feeds.feedburner.com/AICPA_BusinessIndustryGovt", "http://feeds.feedburner.com/AICPA_Tax", "http://feeds.feedburner.com/AICPA_Newsroom", "http://www.journalofaccountancy.com/news.xml"};
+
+        List<RssEntity> rssEntities = RssDatastore.readScheduledRssEntities();
+        List<KeyWordEntity> keyWordEntities = KeyWordDatastore.readAllKeyWordEntities();
+        int headlines = 0;
+        boolean atLeastOneNewHeadline;
+        boolean allNewHeadlines;
+        try {
+            //URL feedUrl = new URL("http://finance.yahoo.com/rss/headline?s=PEP");
+            for(RssEntity rssEntity:rssEntities) {
+                URL feedUrl = new URL(rssEntity.getUrl());
+
+                if(rssEntity.getLastRead() == null){
+                    rssEntity.setLastRead(0L);
+                }
+
+                SyndFeedInput input = new SyndFeedInput();
+                SyndFeed feed = input.build(new XmlReader(feedUrl));
+                atLeastOneNewHeadline = false;
+                allNewHeadlines = true;
+                for (SyndEntry syndEntry : feed.getEntries()) {
+                    if(syndEntry.getPublishedDate() != null && syndEntry.getPublishedDate().getTime() > rssEntity.getLastRead()
+                            && syndEntry.getPublishedDate().getTime() < new Date().getTime()) {
+                        headlines++;
+                        resp.getWriter().println(syndEntry.getTitle());
+                        resp.getWriter().println(syndEntry.getPublishedDate());
+                        atLeastOneNewHeadline = true;
+                        DateTime date = new DateTime(syndEntry.getPublishedDate());
+                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                        String simpleDate = simpleDateFormat.format(date.getValue());
+                        for (KeyWordEntity keyWordEntity : keyWordEntities) {
+                            if (syndEntry.getTitle().toLowerCase().contains(keyWordEntity.getKeyWord())) {
+                                if (keyWordEntity.getDateCount() == null) {
+                                    keyWordEntity.setDateCount(new HashMap<String, Long>());
+                                }
+                                if (keyWordEntity.getDateCount().get(simpleDate) == null) {
+                                    keyWordEntity.getDateCount().put(simpleDate, 1L);
+                                } else {
+                                    keyWordEntity.getDateCount().put(simpleDate, keyWordEntity.getDateCount().get(simpleDate) + 1);
+                                }
+                            }
+                        }
+                    } else {
+                        allNewHeadlines = false;
+                    }
+                }
+                /*
+                if(allNewHeadlines && atLeastOneNewHeadline){
+                    //inverse backoff
+                    log.info("ALL headlines were NEW: "+feed.getTitle());
+                    rssEntity.setReadFrequency(Math.max(rssEntity.getReadFrequency() / 2, Globals.MINIMUN_RSS_BACKOFF));
+                } else if(!atLeastOneNewHeadline){
+                    log.info("All headlines were OLD: "+feed.getTitle());
+                    //backoff
+                    rssEntity.setReadFrequency(Math.min(rssEntity.getReadFrequency()*2, Globals.MAXIMUM_RSS_BACKOFF));
+                } else {
+                    log.info("Some headlinge were NEW: "+feed.getTitle());
+                }
+                Long now = new Date().getTime();
+                rssEntity.setScheduledRead(now+rssEntity.getReadFrequency());
+                rssEntity.setLastRead(now);
+                RssDatastore.updateRssEntity(rssEntity);*/
+            }
+            resp.getWriter().println("From " + rssEntities.size() + " rss feeds and " + headlines+" headlines the following key words were mentioned this many times");
+            resp.getWriter().println("");
+            log.info("Read "+headlines+" headlines from: "+rssEntities.size()+" different feeds");
+            for(KeyWordEntity keyWordEntity:keyWordEntities){
+                //save updated values
+                KeyWordDatastore.updateKeyWordEntity(keyWordEntity);
+                resp.getWriter().print(keyWordEntity.getKeyWord()+": ");
+                resp.getWriter().println(keyWordEntity.getDateCount());
+            }
+            //resp.getWriter().println(totals);
+
+        }
+        catch (Exception ex) {
+            resp.getWriter().println(ex.toString());
+            resp.getWriter().print("Error");
+        }
+    }
+}

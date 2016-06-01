@@ -54,9 +54,30 @@
         <servlet-name>InputKeyWordServlet</servlet-name>
         <url-pattern>/inputkeyword</url-pattern>
     </servlet-mapping>
-
-
-
+    <servlet>
+        <servlet-name>TwitterServlet</servlet-name>
+        <servlet-class>com.dikulous.ric.myapplication.backend.servlet.TwitterServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>TwitterServlet</servlet-name>
+        <url-pattern>/twitter</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>ToneServlet</servlet-name>
+        <servlet-class>com.dikulous.ric.myapplication.backend.servlet.ToneServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ToneServlet</servlet-name>
+        <url-pattern>/tone</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>TwitterSearchServlet</servlet-name>
+        <servlet-class>com.dikulous.ric.myapplication.backend.servlet.TwitterSearchServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>TwitterSearchServlet</servlet-name>
+        <url-pattern>/twittersearch</url-pattern>
+    </servlet-mapping>
 
     <welcome-file-list>
         <welcome-file>index.jsp</welcome-file>

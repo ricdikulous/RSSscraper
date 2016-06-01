@@ -21,7 +21,6 @@ import com.dikulous.ric.myapplication.backend.model.KeyWordEntity;
 import com.dikulous.ric.myapplication.backend.model.RssEntity;
 import com.dikulous.ric.myapplication.backend.util.Globals;
 import com.google.appengine.repackaged.com.google.api.client.util.DateTime;
-import com.ibm.watson.developer_cloud.tone_analyzer.v1.ToneAnalyzer;
 import com.rometools.rome.feed.synd.SyndEntry;
 import com.rometools.rome.feed.synd.SyndEntryImpl;
 import com.rometools.rome.feed.synd.SyndFeed;

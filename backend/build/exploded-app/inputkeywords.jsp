@@ -6,7 +6,7 @@
 
 <html>
     <head>
-        <title>Add Item to Menu</title>
+        <title>Input Keyword</title>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
@@ -27,7 +27,7 @@
                 <%
                     } else {
                 %>
-                    Fucked up save because either the URL didn't work or it already exists
+                   DID NOT it already exists
                 <%
                     }
                 %>
@@ -53,6 +53,7 @@
                               <option value="economic">Economic</option>
                               <option value="finance">Finance</option>
                               <option value="politics">Politics</option>
+                              <option value="event">Event</option>
                           </select>
                        </div>
                        <div class="form-group">
