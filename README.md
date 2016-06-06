@@ -6,4 +6,6 @@ possibility).<br>
 The project has been broken into two separate websites because the original host (Google App Engine) did not allow us to 
 open a persistent stream with Twitter. I created a different poject and a website with a different host (Openshift) to 
 consume the Twitter API.<br>
-This however is the RSS scraper project
+This is the RSS scraper project
+TwitterScraper is viewable <a href="https://github.com/ricdikulous/twitterscraper">here</a>
+
